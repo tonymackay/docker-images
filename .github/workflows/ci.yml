@@ -38,13 +38,9 @@ jobs:
           # Publish 'latest' and semantic tags only if pushing to 'master'
           if [[ "$GITHUB_REF" == 'refs/heads/master' && "$GITHUB_EVENT" == 'push' ]]; then
             export DOCKER_TAGS="${DOCKER_TAGS} --tag ${DOCKER_REPO}:latest"
-            # Look for the version tag in the registry and if it does not exist, create all other semantic version tags for it
+            # Look for the version tag in the registry and if it does not exist
             if ! curl --fail --silent "https://hub.docker.com/v2/repositories/${DOCKER_REPO}/tags/${VERSION}/" >/dev/null; then
-              IFS="." read -r -a semver <<< "$VERSION"
-              export major="${semver[0]}" minor="${semver[1]}" patch="${semver[2]}"
-              for version in "${major}.${minor}.${patch}" "${major}.${minor}" "${major}"; do
-                export DOCKER_TAGS="${DOCKER_TAGS} --tag ${DOCKER_REPO}:${version}"
-              done
+                export DOCKER_TAGS="${DOCKER_TAGS} --tag ${DOCKER_REPO}:${VERSION}"
             fi
           fi
           # Build/tag/push image
