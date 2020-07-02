@@ -49,8 +49,8 @@ jobs:
           if [[ "$GITHUB_REF" == 'refs/heads/master' && "$GITHUB_EVENT" == 'push' ]]; then
             # Only build when version is not in Docker registry
             if ! curl --fail --silent "https://hub.docker.com/v2/repositories/${DOCKER_REPO}/tags/${VERSION}/" >/dev/null; then
-                export DOCKER_TAGS="${DOCKER_TAGS} --tag ${DOCKER_REPO}:${VERSION}"
                 export DOCKER_TAGS="--tag ${DOCKER_REPO}:${GITHUB_SHA::8}"
+                export DOCKER_TAGS="${DOCKER_TAGS} --tag ${DOCKER_REPO}:${VERSION}"
                 export DOCKER_TAGS="${DOCKER_TAGS} --tag ${DOCKER_REPO}:latest"
                 # Build/tag/push image
                 eval docker buildx build --rm --pull --push \
