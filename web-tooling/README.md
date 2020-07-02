@@ -54,7 +54,7 @@ docker run --rm -it \
 The AWS CLI and NodeJS can be used in the same way as it is in the official images.
 
 [buster]: https://hub.docker.com/_/debian?tab=tags&page=1&name=buster-slim
-[dockerfile]: https://github.com/tonymackay/images/web-tooling/Dockerfile
+[dockerfile]: Dockerfile
 [s3-sync]: https://github.com/tonymackay/s3-sync
 [cf-purge]: https://github.com/tonymackay/cf-purge
 [hugo]: https://github.com/gohugoio/hugo
