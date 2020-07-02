@@ -60,3 +60,6 @@ The AWS CLI and NodeJS can be used in the same way as it is in the official imag
 [hugo]: https://github.com/gohugoio/hugo
 [awscli]: https://github.com/aws/aws-cli
 [nodejs]: https://github.com/nodejs/node
+
+## License
+MIT. See `LICENSE` for more details.
