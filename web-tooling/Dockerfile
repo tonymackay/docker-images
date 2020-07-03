@@ -27,6 +27,9 @@ RUN apt update && apt install unzip -y \
     && unzip awscliv2.zip \
     && ./aws/install
     
+# ca-certificates
+RUN apt-get install ca-certificates
+
 # NodeJS v12.18.2
 FROM node:lts-buster-slim AS node-installer
 FROM debian:buster-slim
@@ -40,6 +43,8 @@ COPY --from=installer /go/bin/hugo /go/bin/hugo
 # copy aws-cli
 COPY --from=installer /usr/local/aws-cli/ /usr/local/aws-cli/
 COPY --from=installer /usr/local/bin/ /usr/local/bin/
+# copy ca-certificates
+COPY --from=installer /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 # copy NodeJS
 COPY --from=node-installer /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node-installer /usr/local/bin /usr/local/bin

@@ -11,7 +11,7 @@ jobs:
           - repo: tonymackay/web-tooling
             path: web-tooling
             platform: linux/amd64
-            version: '1.0.0'
+            version: '1.0.1'
           - repo: tonymackay/hugo
             path: hugo
             platform: linux/amd64
