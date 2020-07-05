@@ -3,6 +3,22 @@ FROM golang:buster AS installer
 ENV S3_SYNC_VERSION=v1.0.0-beta2
 ENV CF_PURGE_VERSION=v1.0.0-beta1
 ENV HUGO_VERSION=v0.73.0
+ENV IMG_COMPRESSOR_VERSION=v1.0.0-beta1
+ENV GUETZLI_VERSION=1.0.1
+ENV ZOPFLIPNG_VERSION=1.0.3
+
+# Build guetzli
+WORKDIR /guetzli
+RUN apt-get update && apt-get install libpng-dev -y
+RUN git clone https://github.com/google/guetzli.git . && git checkout v${GUETZLI_VERSION}
+RUN make config=release
+RUN ldd /guetzli/bin/Release/guetzli
+
+# Build zopflipng
+WORKDIR /zopflipng
+RUN git clone https://github.com/google/zopfli.git . && git checkout zopfli-${ZOPFLIPNG_VERSION}
+RUN make zopflipng
+RUN ldd /zopflipng/zopflipng
 
 # Build s3-sync
 WORKDIR /go/src/github.com/tonymackay/s3-sync
@@ -15,7 +31,7 @@ RUN git clone https://github.com/tonymackay/cf-purge . && git checkout ${CF_PURG
 RUN go install -ldflags=-X=main.version=${CF_PURGE_VERSION}
 
 # Build Hugo
-WORKDIR /go/src/ç
+WORKDIR /go/src/github.com/gohugoio/hugo
 RUN git clone https://github.com/gohugoio/hugo . && git checkout ${HUGO_VERSION}
 RUN go get github.com/magefile/mage
 RUN mage install
@@ -31,7 +47,6 @@ RUN apt update && apt install unzip -y \
 RUN apt-get install ca-certificates
 
 # Build img-compressor
-ENV IMG_COMPRESSOR_VERSION=v1.0.0-beta1
 WORKDIR /go/src/github.com/tonymackay/img-compressor
 RUN git clone https://github.com/tonymackay/img-compressor . && git checkout ${IMG_COMPRESSOR_VERSION}
 RUN go install -ldflags=-X=main.version=${IMG_COMPRESSOR_VERSION}
@@ -39,6 +54,19 @@ RUN go install -ldflags=-X=main.version=${IMG_COMPRESSOR_VERSION}
 # NodeJS v12.18.2
 FROM node:lts-buster-slim AS node-installer
 FROM debian:buster-slim
+
+# copy guetzli and zopflipng
+COPY --from=installer /guetzli/bin/Release/guetzli /usr/local/bin/guetzli
+COPY --from=installer /zopflipng/zopflipng /usr/local/bin/zopflipng
+
+# copy guetzli and zopflipng dependencies
+COPY --from=installer /usr/lib/x86_64-linux-gnu/libpng16.so.16 /usr/lib/x86_64-linux-gnu/libpng16.so.16
+COPY --from=installer /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu/libz.so.1
+COPY --from=installer /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+COPY --from=installer /lib/x86_64-linux-gnu/libm.so.6 /lib/x86_64-linux-gnu/libm.so.6
+COPY --from=installer /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so.1
+COPY --from=installer /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu/libc.so.6
+COPY --from=installer /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
 
 # copy s3-sync
 COPY --from=installer /go/bin/s3-sync /go/bin/s3-sync
