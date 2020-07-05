@@ -30,6 +30,12 @@ RUN apt update && apt install unzip -y \
 # ca-certificates
 RUN apt-get install ca-certificates
 
+# Build img-compressor
+ENV IMG_COMPRESSOR_VERSION=v1.0.0-beta1
+WORKDIR /go/src/github.com/tonymackay/img-compressor
+RUN git clone https://github.com/tonymackay/img-compressor . && git checkout ${IMG_COMPRESSOR_VERSION}
+RUN go install -ldflags=-X=main.version=${IMG_COMPRESSOR_VERSION}
+
 # NodeJS v12.18.2
 FROM node:lts-buster-slim AS node-installer
 FROM debian:buster-slim
@@ -45,6 +51,8 @@ COPY --from=installer /usr/local/aws-cli/ /usr/local/aws-cli/
 COPY --from=installer /usr/local/bin/ /usr/local/bin/
 # copy ca-certificates
 COPY --from=installer /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+# copy img-compressor
+COPY --from=installer /go/bin/img-compressor /go/bin/img-compressor
 # copy NodeJS
 COPY --from=node-installer /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node-installer /usr/local/bin /usr/local/bin
